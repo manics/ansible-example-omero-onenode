@@ -1,0 +1,12 @@
+---
+# https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+
+omero-all:
+  hosts:
+    # Run ansible on the OMERO host
+    localhost:
+      ansible_connection: local
+
+    # Run ansible on a remote host using ssh
+    # 192.168.0.1:
+    #   ansible_user: centos

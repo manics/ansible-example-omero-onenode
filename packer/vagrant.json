@@ -1,0 +1,43 @@
+{
+  "variables": {
+    "omero_server_version": "",
+    "omero_web_version": ""
+  },
+  "builders": [
+    {
+      "type": "vagrant",
+      "source_path": "centos/7",
+      "box_version": "1905.1",
+      "checksum_type": "none",
+      "provider": "virtualbox",
+      "add_force": true,
+      "communicator": "ssh"
+    }
+  ],
+  "provisioners":[
+    {
+      "type": "file",
+      "source": "../playbook.yml",
+      "destination": "playbook.yml"
+    },
+    {
+      "type": "file",
+      "source": "../inventory.yml",
+      "destination": "inventory.yml"
+    },
+    {
+      "type": "file",
+      "source": "../requirements.yml",
+      "destination": "requirements.yml"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo yum install -y -q epel-release",
+        "sudo yum install -y -q ansible",
+        "ansible-galaxy install -p roles -r requirements.yml",
+        "ansible-playbook -i inventory.yml playbook.yml"
+      ]
+    }
+  ]
+}

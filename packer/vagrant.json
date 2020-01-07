@@ -14,6 +14,17 @@
       "template": "vagrantfile.template",
       "add_force": true,
       "communicator": "ssh"
+    },
+    {
+      "type": "vagrant",
+      "name": "libvirt",
+      "source_path": "centos/7",
+      "box_version": "1905.1",
+      "checksum_type": "none",
+      "provider": "libvirt",
+      "template": "vagrantfile.template",
+      "add_force": true,
+      "communicator": "ssh"
     }
   ],
   "provisioners":[

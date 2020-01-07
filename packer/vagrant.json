@@ -10,6 +10,7 @@
       "box_version": "1905.1",
       "checksum_type": "none",
       "provider": "virtualbox",
+      "template": "vagrantfile.template",
       "add_force": true,
       "communicator": "ssh"
     }

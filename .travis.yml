@@ -1,12 +1,51 @@
 ---
-sudo: required
-language: python
+language: generic
+dist: bionic
 
-services:
-  - docker
+env:
+  matrix:
+    - PROVIDER=libvirt
+    - PROVIDER=virtualbox
 
 install:
-  - pip install ome-ansible-molecule
+  # https://unix.stackexchange.com/questions/159094/how-to-install-a-deb-file-by-dpkg-i-or-by-apt
+  - curl -sfLO https://releases.hashicorp.com/vagrant/2.2.6/vagrant_2.2.6_x86_64.deb
+  - sudo apt-get install -y -q ./vagrant_2.2.6_x86_64.deb
+  # https://github.com/vagrant-libvirt/vagrant-libvirt#installation
+  - |
+    if [ "$PROVIDER" = libvirt ]; then
+      sudo apt-get install -y -q ruby-libvirt qemu libvirt-bin ebtables dnsmasq-base libxslt-dev libxml2-dev libvirt-dev zlib1g-dev ruby-dev
+      sudo usermod -aG libvirt $(whoami)
+      vagrant plugin install vagrant-libvirt
+    fi
+  # https://github.com/rootless-containers/usernetes/pull/112/files
+  # vagrant 2.2.6 doesn't support virtualbox 6.1
+  - |
+    if [ "$PROVIDER" = virtualbox ]; then
+      curl -sfL https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo apt-key add -
+      sudo sh -c "echo deb https://download.virtualbox.org/virtualbox/debian bionic contrib >> /etc/apt/sources.list"
+      sudo apt-get update
+      sudo apt-get install -y -q build-essential gcc make linux-headers-$(uname -r) virtualbox-6.0
+      sudo usermod -aG vboxusers $(whoami)
+      VBoxManage --version
+    fi
+  # packer 1.4.5 1.5.1 have different bugs
+  - |
+    PACKER_VERSION=${PACKER_VERSION:-1.5.1}
+    pushd /tmp
+    curl -sfLO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip
+    unzip -o packer_${PACKER_VERSION}_linux_amd64.zip
+    sudo mv packer /usr/local/bin/
+    popd
+    packer version
 
 script:
-  - molecule test
+  # We've added the user to a new group, but this normally requires the user
+  # to logout and back in to pick up the new group.
+  - cd packer
+  - |
+    if [ "$PROVIDER" = libvirt ]; then
+      echo packer build --only $PROVIDER vagrant.json | newgrp libvirt
+    else
+      packer build --only $PROVIDER vagrant.json
+    fi

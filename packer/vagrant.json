@@ -1,11 +1,12 @@
 {
   "variables": {
-    "omero_server_version": "",
-    "omero_web_version": ""
+    "omero_server_release": "5.6.0-m5",
+    "omero_web_release": "present"
   },
   "builders": [
     {
       "type": "vagrant",
+      "name": "virtualbox",
       "source_path": "centos/7",
       "box_version": "1905.1",
       "checksum_type": "none",
@@ -37,7 +38,7 @@
         "sudo yum install -y -q epel-release",
         "sudo yum install -y -q ansible",
         "ansible-galaxy install -p roles -r requirements.yml",
-        "ansible-playbook -i inventory.yml playbook.yml"
+        "ansible-playbook -i inventory.yml playbook.yml -e omero_server_release={{user `omero_server_release`}} -e omero_web_release={{user `omero_web_release`}}"
       ]
     }
   ]

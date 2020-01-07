@@ -16,7 +16,7 @@ install:
     if [ "$PROVIDER" = libvirt ]; then
       sudo apt-get install -y -q ruby-libvirt qemu libvirt-bin ebtables dnsmasq-base libxslt-dev libxml2-dev libvirt-dev zlib1g-dev ruby-dev
       sudo usermod -aG libvirt $(whoami)
-      vagrant plugin install vagrant-libvirt
+      sudo vagrant plugin install vagrant-libvirt
     fi
   # https://github.com/rootless-containers/usernetes/pull/112/files
   # vagrant 2.2.6 doesn't support virtualbox 6.1
@@ -40,12 +40,5 @@ install:
     packer version
 
 script:
-  # We've added the user to a new group, but this normally requires the user
-  # to logout and back in to pick up the new group.
   - cd packer
-  - |
-    if [ "$PROVIDER" = libvirt ]; then
-      echo packer build --only $PROVIDER vagrant.json | newgrp libvirt
-    else
-      packer build --only $PROVIDER vagrant.json
-    fi
+  - sudo packer build --only $PROVIDER vagrant.json

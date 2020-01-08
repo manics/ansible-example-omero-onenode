@@ -31,7 +31,11 @@ install:
     fi
   # packer 1.4.5 1.5.1 have different bugs
   - |
-    PACKER_VERSION=${PACKER_VERSION:-1.5.1}
+    if [ "$PROVIDER" = libvirt ]; then
+      PACKER_VERSION=1.4.5
+    else
+      PACKER_VERSION=1.5.1
+    fi
     pushd /tmp
     curl -sfLO https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip
     unzip -o packer_${PACKER_VERSION}_linux_amd64.zip
